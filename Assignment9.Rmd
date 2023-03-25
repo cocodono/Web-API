@@ -1,0 +1,70 @@
+---
+title: "Data 607 Assignment 9"
+author: "Coco Donovan"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Introduction
+
+I chose to use The New York Times "Most Popular API," with a focus on the last 
+30 days (from [insert date]). I have limited experience working with API's up 
+until this point, so this will serve as a great opportunity to get my feet wet.
+I will also try to document quagmire's that come up during this assignment.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Downloading the necessary packages
+
+```{r}
+library(httr)
+library(jsonlite)
+library(dplyr)
+```
+
+Note: For whatever reason, when I loaded jsonlite and tried to run the code
+without "jsonlite::" in front of "fromJSON," the code did not work. I would love to 
+understand why this was the case.
+
+```{r}
+url <- 'https://api.nytimes.com/svc/mostpopular/v2/viewed/30.json?api-key=jBvT5e5Dn4qZTbHgmdS9volt2ddGQIII'
+
+json <- jsonlite::fromJSON(url)
+```
+
+
+
+```{r}
+most_pop <- json$results
+```
+
+## Printing the head of the data
+
+```{r}
+head(most_pop)
+```
+
+Note: What would have been cool is if the data included a view count, but it 
+does not seem like that is the case.
+
+```{r}
+most_pop_sections <- most_pop %>%
+  select('section') %>%
+  group_by(section) %>%
+  summarize(percent = 100 * n()/nrow(.)) %>%
+  arrange(desc(percent))
+
+knitr::kable(most_pop_sections)
+```
+
+## Conclusion
+
+Within the twenty most popular articles in the past 30 days, it seems that by 
+far and away the most popular article section is the "U.S." section. Now this 
+analysis only pertains to the last 30 days and so this popularity may change, 
+but I would guess that with increasingly polarized politics, this section 
+viewership may not change all that much.
